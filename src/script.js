@@ -50,7 +50,9 @@ PLANETS.forEach(planet => {
 	mesh.distance = planet.position
 	mesh.orbitTime = planet.orbitTime
 	mesh.sunAxleTime = planet.sunAxleTime
-	
+
+	mesh.castShadow = true
+	mesh.receiveShadow = true
 
 	if (planet.name === 'Saturn') {
 		const ringGeometry = new THREE.RingGeometry(
@@ -59,7 +61,7 @@ PLANETS.forEach(planet => {
 			64
 		)
 		const ringMaterial = new THREE.MeshBasicMaterial({
-			color: 0xFFCC66,
+			color: 0xffcc66,
 			side: THREE.DoubleSide,
 			transparent: true,
 			opacity: 0.4,
@@ -71,31 +73,48 @@ PLANETS.forEach(planet => {
 
 	orbits.add(mesh)
 })
+
 scene.add(orbits)
-sunLight.target = orbits.children[0];
 
+sunLight.target = orbits
 
-const planetSpeeds = {};
-const speedTime = gui.addFolder('Planets Speed');
+const planetSpeeds = {}
+const speedTime = gui.addFolder('Planets Speed')
 PLANETS.forEach(planet => {
-    if (planet.name !== 'Sun') {
-        planetSpeeds[planet.name] = planet.sunAxleTime; // Изначальная скорость
-        speedTime.add(planetSpeeds, planet.name).min(0.1).max(2).step(0.1).name(`${planet.name} Speed`);
-				planet.castShadow = true;
-				planet.receiveShadow = true;
-    }
-});
-const cameraPos = gui.addFolder('Camera Position');
-cameraPos.add(camera.position, 'x').min(50).max(150).step(10).name('Camera PositionX:');
-cameraPos.add(camera.position, 'y').min(70).max(150).step(10).name('Camera PositionY:');
-cameraPos.add(camera.position, 'z').min(200).max(400).step(10).name('Camera PositionZ:');
+	if (planet.name !== 'Sun') {
+		planetSpeeds[planet.name] = planet.sunAxleTime 
+		speedTime
+			.add(planetSpeeds, planet.name)
+			.min(0.1)
+			.max(2)
+			.step(0.1)
+			.name(`${planet.name} Speed`)
+		planet.castShadow = true
+		planet.receiveShadow = true
+	}
+})
+const cameraPos = gui.addFolder('Camera Position')
+cameraPos
+	.add(camera.position, 'x')
+	.min(50)
+	.max(150)
+	.step(10)
+	.name('Camera PositionX:')
+cameraPos
+	.add(camera.position, 'y')
+	.min(70)
+	.max(150)
+	.step(10)
+	.name('Camera PositionY:')
+cameraPos
+	.add(camera.position, 'z')
+	.min(200)
+	.max(400)
+	.step(10)
+	.name('Camera PositionZ:')
 
 window.addEventListener('dblclick', () => {
-	if (!document.fullscreenElement) {
-		canvas.requestFullscreen()
-	} else {
-		document.exitFullscreen()
-	}
+	!document.fullscreenElement ? canvas.requestFullscreen() : document.exitFullscreen()
 })
 
 window.addEventListener('resize', () => {
@@ -107,7 +126,6 @@ window.addEventListener('resize', () => {
 	renderer.setSize(sizes.width, sizes.height)
 	renderer.render(scene, camera)
 })
-
 const stats = new Stats()
 stats.showPanel(0)
 document.body.appendChild(stats.dom)
@@ -140,11 +158,17 @@ const animate = () => {
 	orbits.children.forEach(child => {
 		child.rotation.y += Math.cos(delta) * child.orbitTime
 		if (child.name !== 'Sun') {
-			child.position.set(Math.cos(angle * planetSpeeds[child.name]) * child.distance, 0, Math.sin(angle * planetSpeeds[child.name]) * child.distance)
+			child.position.set(
+				Math.cos(angle * planetSpeeds[child.name]) * child.distance,
+				0,
+				Math.sin(angle * planetSpeeds[child.name]) * child.distance
+			)
 		} else if (child.name === 'Saturn') {
 			child.children[0].rotation.z += 0.01
 		}
 	})
+
+	sunLight.target.position.copy(orbits.position)
 
 	renderer.render(scene, camera)
 

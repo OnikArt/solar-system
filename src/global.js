@@ -60,7 +60,7 @@ const PLANETS = [
 		position: 0,
 		material: 'textures/sun.jpg',
 		size: 10,
-		orbitTime: 0.02,
+		orbitTime: 0.0002,
 		sunAxleTime: 0.45,
 	},
 	{
